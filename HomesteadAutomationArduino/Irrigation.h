@@ -9,8 +9,12 @@
 class Irrigation : public Device {
   public:
     Irrigation(int id, int pin, char newName[20], bool daysOfWeekToIrrigate[7], IrrigationTimes irrigationTimes[NUM_IRRIGATION_TIMES]); 
+    bool isDayToIrrigate();
+    const char* getType();
+    void runDevice() override;
 
   private:
+    const char *deviceType = "irrigation";
     bool daysOfWeekToIrrigate[7];
     IrrigationTimes irrigationTimes[NUM_IRRIGATION_TIMES];
 };
