@@ -1,25 +1,29 @@
+#ifndef Menu_h
+#define Menu_h
+
 #include <LiquidCrystal.h> 
 #include "Button.h"
 #include "RotaryEncoder.h"
 #include "time.h"
 
 class Menu {
+  static int lastPos;
   public:
     Menu();
     void displayMenu();
-
-    
 
   private:
     const int waitSeconds = 5;
     RotaryEncoder encoder;
     LiquidCrystal lcd;
     Button button;
-    int lastPos;
-    time_t lastButtonPress;
+    bool newButtonPress;
+    
+    long int lastButtonPress;
     const int rotaryMin = 0;
     int rotaryMax;
     int menuPosition;
+    int longOrShortPress;
     
     char devicesMenuItems[10][20] = {"Irrigation", "Cycle Irrigation"};
     char irrigationMenu[10][20] = {"Pin", "Name", "Days of Week", "Irrigation Times"};
@@ -29,7 +33,12 @@ class Menu {
     void updateEncoder();
     void displayMainMenu();
     void displayCurrentDateTime();
-    bool checkForLongPress();
+    int checkForLongPress();
     void showMenuForMenuPosition();
     void setIdleState();
+    void splitTime(const char *dateTime,char *firstPart,char *secondPart);
 };
+
+
+
+#endif
