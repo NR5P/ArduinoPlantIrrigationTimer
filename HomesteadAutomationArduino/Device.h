@@ -9,6 +9,7 @@ class Device {
     bool setPin(int pin, Device* deviceList[]);
     bool setName(char newName[]);
     int getId();
+    int getPin();
     bool isOn();
     void turnOff();
     void turnOn();
@@ -24,7 +25,6 @@ class Device {
     char deviceName[20];
     bool currentState;
     bool on;
-    bool getPin();
     
 };
 

@@ -5,6 +5,9 @@
 #include "Button.h"
 #include "RotaryEncoder.h"
 #include "time.h"
+#include "Device.h"
+
+extern Device* deviceList[10];
 
 class Menu {
   static int lastPos;
@@ -20,9 +23,10 @@ class Menu {
     bool newButtonPress;
     
     long int lastButtonPress;
-    const int rotaryMin = 0;
+    int rotaryMin = 0;
     int rotaryMax;
     int menuPosition;
+    int lastMenuPosition;
     int longOrShortPress;
     
     char devicesMenuItems[10][20] = {"Irrigation", "Cycle Irrigation"};
@@ -33,7 +37,12 @@ class Menu {
     void updateEncoder();
     void displayMainMenu();
     void displayCurrentDateTime();
+    void displayAddDeviceMenu();
+    void displayIrrigationMenu();
+    void displayCycleIrrigationMenu();
+    void displayPinSelect();
     int checkForLongPress();
+    void checkButtonFlag();
     void showMenuForMenuPosition();
     void setIdleState();
     void splitTime(const char *dateTime,char *firstPart,char *secondPart);

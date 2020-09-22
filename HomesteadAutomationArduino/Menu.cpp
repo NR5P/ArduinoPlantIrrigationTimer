@@ -39,8 +39,9 @@ Menu::Menu() : encoder(A2, A3), lcd(A4,A5,7,8,4,5), button(6, PULLUP), longOrSho
 void Menu::displayMenu() {
   updateEncoder();
   this->longOrShortPress = checkForLongPress(); //long press = true, short press = false, any other = null
-  if (longOrShortPress != 3 && this->menuPosition == 0) {
+  if (longOrShortPress == 0 && this->menuPosition == 0) {
     lcd.clear();
+    Menu::lastPos = 0;
     this->menuPosition = 1;
   }
 
@@ -48,16 +49,62 @@ void Menu::displayMenu() {
 }
 
 void Menu::displayMainMenu() {
-  const int itemCount = 3;
+  const int itemCount = 4;
   rotaryMax = itemCount - 1;
-  char mainMenuItems[itemCount][20] = {"View Devices", "Add Device", "Set Time and Date"};
+  char mainMenuItems[itemCount][20] = {"","View Devices", "Add Device", "Set Time and Date"};
   lcd.setCursor(0,0);
   lcd.print("Main Menu");
   lcd.setCursor(0,1);
   lcd.print(mainMenuItems[Menu::lastPos]);
+  if (longOrShortPress == 1 && this->menuPosition == 1) {
+      this->menuPosition = 0;
+      lcd.clear();
+  }
 
-  //if (this->longOrShortPress == false)
-    //this->menuPosition = 2; TODO: check position of encoder
+  if (longOrShortPress == 0) {
+    switch(Menu::lastPos) {
+      case 0 : 
+        break;
+      case 1 :
+        break;
+      case 2 :
+        this->menuPosition = 3;
+        break;
+      case 3 :
+        break;
+    }
+    encoder.setPosition(0);
+    lcd.clear();
+  }
+}
+
+void Menu::displayAddDeviceMenu() {
+  const int itemCount = 3;
+  rotaryMax = itemCount - 1;
+  char menuItems[itemCount][20] = {"","Irrigation", "CycleIrrigation"};
+  lcd.setCursor(0,0);
+  lcd.print("Add Device");
+  lcd.setCursor(0,1);
+  lcd.print(menuItems[Menu::lastPos]);
+  if (longOrShortPress == 1) {
+      this->menuPosition = 1;
+      lcd.clear();
+  }
+
+  if (longOrShortPress == 0) {
+    switch(Menu::lastPos) {
+      case 0 : 
+        break;
+      case 1 :
+        this->menuPosition = 4;
+        break;
+      case 2 :
+        this->menuPosition = 5;
+        break;
+    }
+    Menu::lastPos = 0;
+    lcd.clear();
+  }
 }
 
 void Menu::displayCurrentDateTime() {
@@ -74,6 +121,66 @@ void Menu::displayCurrentDateTime() {
   //lcd.print(timeString);
   lcd.setCursor(0,1);
   lcd.print(timePart);
+}
+
+void Menu::displayIrrigationMenu() {
+  const int itemCount = 5;
+  rotaryMax = itemCount - 1;
+  char menuItems[itemCount][20] = {"","pin","name","days of week", "times & duration"};
+  lcd.setCursor(0,0);
+  lcd.print("Irrigation");
+  lcd.setCursor(0,1);
+  lcd.print(menuItems[Menu::lastPos]);
+  if (longOrShortPress == 1) {
+      this->menuPosition = 3;
+      lcd.clear();
+  }
+
+  if (longOrShortPress == 0) {
+    switch(Menu::lastPos) {
+      case 1 : 
+        this->menuPosition = 6;
+        break;
+    }
+    Menu::lastPos = 0;
+  }
+}
+
+void Menu::displayCycleIrrigationMenu() {
+  const int itemCount = 7;
+  rotaryMax = itemCount - 1;
+  char menuItems[itemCount][20] = {"","pin","name","cycle on time", "cycle off time", "blackout start", "blackout stop"};
+  lcd.setCursor(0,0);
+  lcd.print("Cycle Irrigation");
+  lcd.setCursor(0,1);
+  lcd.print(menuItems[Menu::lastPos]);
+  if (longOrShortPress == 1) {
+      this->menuPosition = 3;
+      lcd.clear();
+  }
+}
+
+void Menu::displayPinSelect() {
+  const int lowPin = 22;
+  const int highPin = 53;
+  rotaryMin = lowPin;
+  rotaryMax = highPin;
+  bool pinUsed = false;
+  lcd.setCursor(0,0);
+  lcd.print("select avail pin");
+  lcd.setCursor(0,1);
+  for (Device *d : deviceList) {
+    if (Menu::lastPos == d->getPin()) {
+      pinUsed = true;
+    }
+  }
+  lcd.print(Menu::lastPos);
+  if (pinUsed == false) {
+    lcd.println("-available");
+  }
+  else {
+    lcd.println("-used");
+  }
 }
 
 void Menu::updateEncoder() {
@@ -97,7 +204,6 @@ void Menu::updateEncoder() {
 }
 
 int Menu::checkForLongPress() {
-    //Serial.println(button.isPressed());
     if (!button.isPressed())
       newButtonPress = false;
     if (button.isPressed() && !newButtonPress) {
@@ -105,19 +211,16 @@ int Menu::checkForLongPress() {
       newButtonPress = true;
     }
     if (lastButtonPress != NULL) {
-      if (button.isPressed() && ((millis() / 1000) - lastButtonPress) > 3) {
-        Serial.println("long press");
+      if (button.isPressed() && ((millis() / 1000) - lastButtonPress) > 2) {
         lastButtonPress = NULL;
         return 1;
       }
-      if (!button.isPressed() && ((millis() / 1000) - lastButtonPress) < 3) {
-        Serial.println("short press");
+      if (!button.isPressed() && ((millis() / 1000) - lastButtonPress) < 2) {
         lastButtonPress = NULL;
         return 0;
       }
-      return 3;
     }
-
+    return 3;
 }
 
 void Menu::setIdleState() {
@@ -135,6 +238,18 @@ void Menu::showMenuForMenuPosition() {
       break;
     case 2 :
       displayMainMenu();
+      break;
+    case 3 :
+      displayAddDeviceMenu();
+      break;
+     case 4 :
+      displayIrrigationMenu();
+      break;
+     case 5 :
+      displayCycleIrrigationMenu();
+      break;
+     case 6 :
+      displayPinSelect();
       break;
   }
 }

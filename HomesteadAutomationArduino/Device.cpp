@@ -6,10 +6,6 @@ Device::Device(int id, int pin, char newName[]): id(id), pin(pin) {
   pinMode(pin, OUTPUT);
 }
 
-bool Device::getPin() {
-  return this->pin;
-}
-
 bool Device::setPin(int pin, Device* deviceList[]) {
   for (int i = 0; i < NUMOFDEVICES; i++) {
     if (deviceList[i]->getPin() == pin && deviceList[i]->getId() != this->getId()) {
@@ -18,6 +14,10 @@ bool Device::setPin(int pin, Device* deviceList[]) {
   }
   this->pin = pin;
   return true;
+}
+
+int Device::getPin() {
+  return this->pin;
 }
 
 int Device::getId() {
