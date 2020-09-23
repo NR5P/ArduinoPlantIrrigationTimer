@@ -3,6 +3,7 @@
 #include "Arduino.h"
 
 Device* deviceList[10];
+int numDevices = 0;
 Menu menu;
 
 void setup() {

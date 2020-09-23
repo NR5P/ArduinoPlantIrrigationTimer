@@ -39,10 +39,10 @@ Menu::Menu() : encoder(A2, A3), lcd(A4,A5,7,8,4,5), button(6, PULLUP), longOrSho
 void Menu::displayMenu() {
   updateEncoder();
   this->longOrShortPress = checkForLongPress(); //long press = true, short press = false, any other = null
-  if (longOrShortPress == 0 && this->menuPosition == 0) {
+  if (longOrShortPress == 0 && this->menuPosition == CURRENT_DATE_TIME) {
     lcd.clear();
     Menu::lastPos = 0;
-    this->menuPosition = 1;
+    this->menuPosition = MAIN_MENU;
   }
 
   showMenuForMenuPosition();
@@ -56,8 +56,8 @@ void Menu::displayMainMenu() {
   lcd.print("Main Menu");
   lcd.setCursor(0,1);
   lcd.print(mainMenuItems[Menu::lastPos]);
-  if (longOrShortPress == 1 && this->menuPosition == 1) {
-      this->menuPosition = 0;
+  if (longOrShortPress == 1 && this->menuPosition == MAIN_MENU) {
+      this->menuPosition = CURRENT_DATE_TIME;
       lcd.clear();
   }
 
@@ -68,7 +68,7 @@ void Menu::displayMainMenu() {
       case 1 :
         break;
       case 2 :
-        this->menuPosition = 3;
+        this->menuPosition = ADD_DEVICE_MENU;
         break;
       case 3 :
         break;
@@ -87,19 +87,19 @@ void Menu::displayAddDeviceMenu() {
   lcd.setCursor(0,1);
   lcd.print(menuItems[Menu::lastPos]);
   if (longOrShortPress == 1) {
-      this->menuPosition = 1;
+      this->menuPosition = MAIN_MENU;
       lcd.clear();
   }
 
   if (longOrShortPress == 0) {
     switch(Menu::lastPos) {
-      case 0 : 
+      case CURRENT_DATE_TIME : 
         break;
-      case 1 :
-        this->menuPosition = 4;
+      case MAIN_MENU :
+        this->menuPosition = IRRIGATION_MENU;
         break;
       case 2 :
-        this->menuPosition = 5;
+        this->menuPosition = CYCLE_IRRIGATION_MENU;
         break;
     }
     Menu::lastPos = 0;
@@ -132,14 +132,14 @@ void Menu::displayIrrigationMenu() {
   lcd.setCursor(0,1);
   lcd.print(menuItems[Menu::lastPos]);
   if (longOrShortPress == 1) {
-      this->menuPosition = 3;
+      this->menuPosition = ADD_DEVICE_MENU;
       lcd.clear();
   }
 
   if (longOrShortPress == 0) {
     switch(Menu::lastPos) {
       case 1 : 
-        this->menuPosition = 6;
+        this->menuPosition = PIN_SELECT;
         break;
     }
     Menu::lastPos = 0;
@@ -155,7 +155,7 @@ void Menu::displayCycleIrrigationMenu() {
   lcd.setCursor(0,1);
   lcd.print(menuItems[Menu::lastPos]);
   if (longOrShortPress == 1) {
-      this->menuPosition = 3;
+      this->menuPosition = ADD_DEVICE_MENU;
       lcd.clear();
   }
 }
@@ -180,6 +180,42 @@ void Menu::displayPinSelect() {
   }
   else {
     lcd.println("-used");
+  }
+  if (longOrShortPress == 1) {
+      this->menuPosition = IRRIGATION_MENU;
+      lcd.clear();
+  }
+
+  if (longOrShortPress == 0 && pinUsed == false) {
+    int pin = Menu::lastPos;
+    deviceList[numDevices]->setPin(pin, deviceList);
+    rotaryMin = lowPin;
+    rotaryMax = highPin;
+
+    Menu::lastPos = 0;
+  }
+}
+
+void Menu::displayNameSelect() {
+  char alpha[36] = "abcdefghijklmnopqrstuvwxyz123456789";
+  const int lowPin = 0;
+  const int highPin = 35;
+  lcd.setCursor(0,0);
+  lcd.print("name");
+  lcd.setCursor(cursor2pos,1);
+  char currentLetter = alpha[Menu::lastPos];
+  lcd.print(currentLetter);
+
+  if (longOrShortPress == 1) {
+      deviceList[numDevices]->setName(*tempName);
+      this->menuPosition = IRRIGATION_MENU;
+      lcd.clear();
+  }
+
+  if (longOrShortPress == 0) {
+    *tempName[Menu::lastPos] = currentLetter; 
+    cursor2pos++;
+    Menu::lastPos = 0;
   }
 }
 
@@ -225,30 +261,30 @@ int Menu::checkForLongPress() {
 
 void Menu::setIdleState() {
   if (difftime(time(NULL),this->lastButtonPress) > 10)
-    this->menuPosition = 0;
+    this->menuPosition = CURRENT_DATE_TIME;
 }
 
-void Menu::showMenuForMenuPosition() {
+void Menu::showMenuForMenuPosition  () {
   switch(this->menuPosition) {
-    case 0 :
+    case CURRENT_DATE_TIME :
       displayCurrentDateTime();
       break;
-    case 1 :
+    case MAIN_MENU :
       displayMainMenu();
       break;
     case 2 :
       displayMainMenu();
       break;
-    case 3 :
+    case ADD_DEVICE_MENU :
       displayAddDeviceMenu();
       break;
-     case 4 :
+     case IRRIGATION_MENU :
       displayIrrigationMenu();
       break;
-     case 5 :
+     case CYCLE_IRRIGATION_MENU :
       displayCycleIrrigationMenu();
       break;
-     case 6 :
+     case PIN_SELECT :
       displayPinSelect();
       break;
   }

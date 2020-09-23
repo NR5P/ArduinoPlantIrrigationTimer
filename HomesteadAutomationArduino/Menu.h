@@ -8,6 +8,7 @@
 #include "Device.h"
 
 extern Device* deviceList[10];
+extern int numDevices;
 
 class Menu {
   static int lastPos;
@@ -16,6 +17,15 @@ class Menu {
     void displayMenu();
 
   private:
+    enum MENU {
+      CURRENT_DATE_TIME = 0,
+      MAIN_MENU = 1,
+      ADD_DEVICE_MENU = 3,
+      IRRIGATION_MENU = 4,
+      CYCLE_IRRIGATION_MENU = 5,
+      PIN_SELECT = 6
+    };
+
     const int waitSeconds = 5;
     RotaryEncoder encoder;
     LiquidCrystal lcd;
@@ -28,7 +38,9 @@ class Menu {
     int menuPosition;
     int lastMenuPosition;
     int longOrShortPress;
+    int cursor2pos = 0;
     
+    char *tempName[2];
     char devicesMenuItems[10][20] = {"Irrigation", "Cycle Irrigation"};
     char irrigationMenu[10][20] = {"Pin", "Name", "Days of Week", "Irrigation Times"};
     char daysOfWeekMenu[7][10] = {"Monday", "Tuesday", "Wendesday", "Thursday", "Friday", "Saturday", "Sunday"};
@@ -41,6 +53,7 @@ class Menu {
     void displayIrrigationMenu();
     void displayCycleIrrigationMenu();
     void displayPinSelect();
+    void displayNameSelect();
     int checkForLongPress();
     void checkButtonFlag();
     void showMenuForMenuPosition();
